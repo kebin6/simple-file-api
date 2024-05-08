@@ -1,11 +1,11 @@
 FROM alpine:3.19
 
 # Define the project name | 定义项目名称
-ARG PROJECT=file
+ARG PROJECT=fms
 # Define the config file name | 定义配置文件名
-ARG CONFIG_FILE=file.yaml
+ARG CONFIG_FILE=fms_test.yaml
 # Define the author | 定义作者
-ARG AUTHOR="example@example.com"
+ARG AUTHOR="hebinliu6@gmail.com"
 
 LABEL org.opencontainers.image.authors=${AUTHOR}
 

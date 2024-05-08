@@ -1,14 +1,19 @@
 # Custom configuration | 独立配置
 # Service name | 项目名称
-SERVICE=File
+SERVICE=Fms
 # Service name in specific style | 项目经过style格式化的名称
-SERVICE_STYLE=file
+SERVICE_STYLE=fms
 # Service name in lowercase | 项目名称全小写格式
-SERVICE_LOWER=file
+SERVICE_LOWER=fms
 # Service name in snake format | 项目名称下划线格式
-SERVICE_SNAKE=file
+SERVICE_SNAKE=fms
 # Service name in snake format | 项目名称短杠格式
-SERVICE_DASH=file
+SERVICE_DASH=fms
+
+DOCKER_NAMESPACES=kebin6s
+DOCKER_USERNAME=475583819@qq.com
+DOCKER_PASSWORD=Yrs.5207788
+REPO=registry.cn-hangzhou.aliyuncs.com
 
 # The project version, if you don't use git, you should set it manually | 项目版本，如果不使用git请手动设置
 VERSION=$(shell git describe --tags --always)
@@ -58,16 +63,26 @@ tools: # Install the necessary tools | 安装必要的工具
 	$(GO) install github.com/golangci/golangci-lint/cmd/golangci-lint@latest;
 	$(GO) install github.com/go-swagger/go-swagger/cmd/swagger@latest
 
+.PHONY: docker
+build-test: # Build the docker image | 构建 docker 镜像
+	docker buildx build --platform=linux/amd64 -f Dockerfile-test -t ${REPO}/${DOCKER_NAMESPACES}/$(SERVICE_DASH)-$(PROJECT_BUILD_SUFFIX):test-${VERSION} .
+	@echo "Build docker for test successfully"
 
 .PHONY: docker
 docker: # Build the docker image | 构建 docker 镜像
-	docker build -f Dockerfile -t ${DOCKER_USERNAME}/$(SERVICE_DASH)-$(PROJECT_BUILD_SUFFIX):${VERSION} .
+	docker build -f Dockerfile-prod -t ${REPO}/${DOCKER_NAMESPACES}/$(SERVICE_DASH)-$(PROJECT_BUILD_SUFFIX):${VERSION} .
 	@echo "Build docker successfully"
+
+.PHONY: publish-docker
+publish-docker-test: # Publish docker image | 发布 docker 镜像
+	echo "${DOCKER_PASSWORD}" | docker login --username ${DOCKER_USERNAME} --password-stdin https://${REPO}
+	docker push ${REPO}/${DOCKER_NAMESPACES}/$(SERVICE_DASH)-$(PROJECT_BUILD_SUFFIX):test-${VERSION}
+	@echo "Publish docker successfully"
 
 .PHONY: publish-docker
 publish-docker: # Publish docker image | 发布 docker 镜像
 	echo "${DOCKER_PASSWORD}" | docker login --username ${DOCKER_USERNAME} --password-stdin https://${REPO}
-	docker push ${DOCKER_USERNAME}/$(SERVICE_DASH)-$(PROJECT_BUILD_SUFFIX):${VERSION}
+	docker push ${REPO}/${DOCKER_NAMESPACES}/$(SERVICE_DASH)-$(PROJECT_BUILD_SUFFIX):${VERSION}
 	@echo "Publish docker successfully"
 
 .PHONY: gen-swagger
